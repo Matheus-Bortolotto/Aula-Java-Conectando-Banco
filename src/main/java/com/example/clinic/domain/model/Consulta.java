@@ -34,6 +34,12 @@ public class Consulta {
         if (min < 15) throw new IllegalArgumentException("Consulta deve ter no mínimo 15 minutos");
     }
 
+    public void validarIntervalo() {
+        if (inicio.isAfter(fim)) {
+            throw new IllegalArgumentException("O início da consulta deve ser antes do fim.");
+        }
+    }
+
     // Regra: horário comercial (08:00 - 18:00)
     public void validarHorarioComercial() {
         int hIni = inicio.getHour();
@@ -42,4 +48,17 @@ public class Consulta {
             throw new IllegalArgumentException("Fora do horário comercial (08:00-18:00)");
         }
     }
+
+    @Override
+    public String toString() {
+        return "Consulta{" +
+                "id=" + id +
+                ", pacienteId=" + pacienteId +
+                ", medicoId=" + medicoId +
+                ", inicio=" + inicio +
+                ", fim=" + fim +
+                '}';
+    }
 }
+
+

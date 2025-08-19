@@ -4,27 +4,42 @@ import com.example.clinic.domain.model.Consulta;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 public class AgendaService {
 
     public interface ConsultaRepository {
         List<Consulta> listarPorMedicoNoIntervalo(long medicoId, LocalDateTime inicio, LocalDateTime fim);
         Long salvar(Consulta c);
+        void cancelar(long id);
     }
 
     private final ConsultaRepository repository;
 
     public AgendaService(ConsultaRepository repository) {
-        this.repository = repository;
+        this.repository = Objects.requireNonNull(repository);
     }
 
-    // Caso de uso: agendar consulta com regras
-    public Long agendar(Consulta consulta) {
-        consulta.validarDuracaoMinima();
-        consulta.validarHorarioComercial();
-        validarAntecedencia(consulta.getInicio());
-        validarChoqueDeHorario(consulta);
-        return repository.salvar(consulta);
+    public Long agendar(Consulta c) {
+        Objects.requireNonNull(c, "Consulta obrigatória");
+        c.validarIntervalo();  // Chama o novo método de validação
+        c.validarDuracaoMinima();
+        c.validarHorarioComercial();
+        validarAntecedencia(c.getInicio());
+        validarChoqueDeHorario(c);
+        return repository.salvar(c);
+    }
+
+    public List<Consulta> listarConsultasDoMedicoNoIntervalo(long medicoId, LocalDateTime inicio, LocalDateTime fim) {
+        if (inicio == null || fim == null || !inicio.isBefore(fim)) {
+            throw new IllegalArgumentException("Intervalo inválido");
+        }
+        return repository.listarPorMedicoNoIntervalo(medicoId, inicio, fim);
+    }
+
+    public void cancelar(long id) {
+        if (id <= 0) throw new IllegalArgumentException("ID inválido");
+        repository.cancelar(id);
     }
 
     private void validarAntecedencia(LocalDateTime inicio) {

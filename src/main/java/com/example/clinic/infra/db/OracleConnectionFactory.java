@@ -15,8 +15,8 @@ public class OracleConnectionFactory {
 
     public static Connection getConnection() throws SQLException {
         String url  = System.getenv().getOrDefault("ORACLE_URL", "jdbc:oracle:thin:@//localhost:1521/FREEPDB1");
-        String user = System.getenv().getOrDefault("ORACLE_USER", "system");
-        String pass = System.getenv().getOrDefault("ORACLE_PASSWORD", "oracle");
+        String user = System.getenv().getOrDefault("ORACLE_USER", "RM55189");
+        String pass = System.getenv().getOrDefault("ORACLE_PASSWORD", "040506");
 
         Properties props = new Properties();
         props.setProperty("user", user);
