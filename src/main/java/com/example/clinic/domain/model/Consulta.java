@@ -1,8 +1,6 @@
 package com.example.clinic.domain.model;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 public class Consulta {
     private Long id;
@@ -13,13 +11,10 @@ public class Consulta {
 
     public Consulta(Long id, Long pacienteId, Long medicoId, LocalDateTime inicio, LocalDateTime fim) {
         this.id = id;
-        this.pacienteId = Objects.requireNonNull(pacienteId);
-        this.medicoId = Objects.requireNonNull(medicoId);
-        this.inicio = Objects.requireNonNull(inicio);
-        this.fim = Objects.requireNonNull(fim);
-        if (!fim.isAfter(inicio)) {
-            throw new IllegalArgumentException("Fim deve ser após início");
-        }
+        this.pacienteId = pacienteId;
+        this.medicoId = medicoId;
+        this.inicio = inicio;
+        this.fim = fim;
     }
 
     public Long getId() { return id; }
@@ -28,37 +23,9 @@ public class Consulta {
     public LocalDateTime getInicio() { return inicio; }
     public LocalDateTime getFim() { return fim; }
 
-    // Regra de negócio: duração mínima de 15 minutos
-    public void validarDuracaoMinima() {
-        long min = Duration.between(inicio, fim).toMinutes();
-        if (min < 15) throw new IllegalArgumentException("Consulta deve ter no mínimo 15 minutos");
-    }
-
-    public void validarIntervalo() {
-        if (inicio.isAfter(fim)) {
-            throw new IllegalArgumentException("O início da consulta deve ser antes do fim.");
-        }
-    }
-
-    // Regra: horário comercial (08:00 - 18:00)
-    public void validarHorarioComercial() {
-        int hIni = inicio.getHour();
-        int hFim = fim.getHour();
-        if (hIni < 8 || hFim >= 18) {
-            throw new IllegalArgumentException("Fora do horário comercial (08:00-18:00)");
-        }
-    }
-
-    @Override
-    public String toString() {
-        return "Consulta{" +
-                "id=" + id +
-                ", pacienteId=" + pacienteId +
-                ", medicoId=" + medicoId +
-                ", inicio=" + inicio +
-                ", fim=" + fim +
-                '}';
-    }
+    public void setId(Long id) { this.id = id; }
+    public void setPacienteId(Long pacienteId) { this.pacienteId = pacienteId; }
+    public void setMedicoId(Long medicoId) { this.medicoId = medicoId; }
+    public void setInicio(LocalDateTime inicio) { this.inicio = inicio; }
+    public void setFim(LocalDateTime fim) { this.fim = fim; }
 }
-
-

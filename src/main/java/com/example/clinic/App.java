@@ -5,6 +5,8 @@ import com.example.clinic.domain.service.AgendaService;
 import com.example.clinic.infra.dao.ConsultaJdbcRepository;
 
 import javax.swing.*;
+
+import com.example.clinic.ui.CadastroMedicoUI;
 import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -178,6 +180,10 @@ public class App {
                             "Erro", JOptionPane.ERROR_MESSAGE);
                 }
             });
+
+            JButton btnCadastroMedico = new JButton("Abrir Cadastro de Médico");
+            panel.add(btnCadastroMedico);
+            btnCadastroMedico.addActionListener(e -> SwingUtilities.invokeLater(() -> new CadastroMedicoUI().setVisible(true)));
 
             frame.setContentPane(panel);
 

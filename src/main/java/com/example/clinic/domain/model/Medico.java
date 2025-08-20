@@ -1,63 +1,21 @@
-package com.example.clinic.ui;
+package com.example.clinic.domain.model;
 
-import com.example.clinic.domain.model.Medico;
-import com.example.clinic.infra.dao.MedicoJdbcRepository;
+public class Medico {
+    private Long id;
+    private String nome;
+    private String crm;
 
-import javax.swing.*;
-import java.awt.*;
-
-public class CadastroMedicoUI extends JFrame {
-
-    public CadastroMedicoUI() {
-        super("Cadastro de Médico");
-        var repo = new MedicoJdbcRepository();
-
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 12, 10, 12));
-        GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(6, 6, 6, 6);
-        c.fill = GridBagConstraints.HORIZONTAL;
-
-        JTextField txtNome = new JTextField(15);
-        JTextField txtCrm = new JTextField(15);
-        JTextField txtEspecialidade = new JTextField(15);
-        JButton btnSalvar = new JButton("Salvar");
-
-        int row = 0;
-        c.gridx=0; c.gridy=row; panel.add(new JLabel("Nome:"), c);
-        c.gridx=1; c.gridy=row++; panel.add(txtNome, c);
-
-        c.gridx=0; c.gridy=row; panel.add(new JLabel("CRM:"), c);
-        c.gridx=1; c.gridy=row++; panel.add(txtCrm, c);
-
-        c.gridx=0; c.gridy=row; panel.add(new JLabel("Especialidade:"), c);
-        c.gridx=1; c.gridy=row++; panel.add(txtEspecialidade, c);
-
-        c.gridx=0; c.gridy=row; c.gridwidth=2; panel.add(btnSalvar, c);
-
-        btnSalvar.addActionListener(ev -> {
-            try {
-                String nome = txtNome.getText().trim();
-                String crm = txtCrm.getText().trim();
-                String especialidade = txtEspecialidade.getText().trim();
-
-                Medico medico = new Medico(null, nome, crm, especialidade);
-                Long id = repo.salvar(medico);
-
-                JOptionPane.showMessageDialog(this,
-                        "Médico cadastrado! ID = " + id,
-                        "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-
-                txtNome.setText(""); txtCrm.setText(""); txtEspecialidade.setText("");
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this,
-                        "Erro ao salvar médico: " + e.getMessage(),
-                        "Erro", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        setContentPane(panel);
-        pack();
-        setLocationRelativeTo(null);
+    public Medico(Long id, String nome, String crm) {
+        this.id = id;
+        this.nome = nome;
+        this.crm = crm;
     }
+
+    public Long getId() { return id; }
+    public String getNome() { return nome; }
+    public String getCrm() { return crm; }
+
+    public void setId(Long id) { this.id = id; }
+    public void setNome(String nome) { this.nome = nome; }
+    public void setCrm(String crm) { this.crm = crm; }
 }
