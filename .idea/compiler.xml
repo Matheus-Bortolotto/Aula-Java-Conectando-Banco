@@ -6,6 +6,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="Conectando-java-com-banco" />
         <module name="ddd-agenda" />
       </profile>
     </annotationProcessing>

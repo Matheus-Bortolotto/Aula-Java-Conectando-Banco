@@ -1,60 +1,48 @@
 package com.example.clinic.domain.service;
 
 import com.example.clinic.domain.model.Consulta;
-import java.time.Duration;
-import java.time.LocalDateTime;
+import com.example.clinic.infra.dao.ConsultaJdbcRepository;
+import com.example.clinic.infra.dao.PacienteJdbcRepository;
+import com.example.clinic.infra.dao.MedicoJdbcRepository;
+
 import java.util.List;
-import java.util.Objects;
 
 public class AgendaService {
 
-    public interface ConsultaRepository {
-        List<Consulta> listarPorMedicoNoIntervalo(long medicoId, LocalDateTime inicio, LocalDateTime fim);
-        Long salvar(Consulta c);
-        void cancelar(long id);
+    private final ConsultaJdbcRepository consultaRepo;
+    private final PacienteJdbcRepository pacienteRepo;
+    private final MedicoJdbcRepository medicoRepo;
+
+    public AgendaService(ConsultaJdbcRepository consultaRepo) {
+        this.consultaRepo = consultaRepo;
+        this.pacienteRepo = new PacienteJdbcRepository();
+        this.medicoRepo = new MedicoJdbcRepository();
     }
 
-    private final ConsultaRepository repository;
-
-    public AgendaService(ConsultaRepository repository) {
-        this.repository = Objects.requireNonNull(repository);
-    }
-
-    public Long agendar(Consulta c) {
-        Objects.requireNonNull(c, "Consulta obrigatória");
-        c.validarIntervalo();  // Chama o novo método de validação
-        c.validarDuracaoMinima();
-        c.validarHorarioComercial();
-        validarAntecedencia(c.getInicio());
-        validarChoqueDeHorario(c);
-        return repository.salvar(c);
-    }
-
-    public List<Consulta> listarConsultasDoMedicoNoIntervalo(long medicoId, LocalDateTime inicio, LocalDateTime fim) {
-        if (inicio == null || fim == null || !inicio.isBefore(fim)) {
-            throw new IllegalArgumentException("Intervalo inválido");
+    public Long agendar(Consulta consulta) {
+        // 1. Verificar se paciente existe
+        var paciente = pacienteRepo.buscarPorId(consulta.getPacienteId());
+        if (paciente == null) {
+            throw new IllegalArgumentException("Paciente não encontrado (ID = " + consulta.getPacienteId() + ")");
         }
-        return repository.listarPorMedicoNoIntervalo(medicoId, inicio, fim);
-    }
 
-    public void cancelar(long id) {
-        if (id <= 0) throw new IllegalArgumentException("ID inválido");
-        repository.cancelar(id);
-    }
-
-    private void validarAntecedencia(LocalDateTime inicio) {
-        long minutos = Duration.between(LocalDateTime.now(), inicio).toMinutes();
-        if (minutos < 60) {
-            throw new IllegalArgumentException("Consulta deve ser marcada com antecedência mínima de 60 minutos");
+        // 2. Verificar se médico existe
+        var medico = medicoRepo.buscarPorId(consulta.getMedicoId());
+        if (medico == null) {
+            throw new IllegalArgumentException("Médico não encontrado (ID = " + consulta.getMedicoId() + ")");
         }
-    }
 
-    private void validarChoqueDeHorario(Consulta nova) {
-        List<Consulta> existentes = repository.listarPorMedicoNoIntervalo(
-                nova.getMedicoId(), nova.getInicio(), nova.getFim());
-        boolean conflita = existentes.stream().anyMatch(c ->
-                c.getInicio().isBefore(nova.getFim()) && nova.getInicio().isBefore(c.getFim())
+        // 3. Impedir conflito de horários do mesmo médico
+        List<Consulta> consultasDoMedico = consultaRepo.buscarPorMedico(consulta.getMedicoId());
+        boolean conflito = consultasDoMedico.stream().anyMatch(c ->
+                consulta.getInicio().isBefore(c.getFim()) &&
+                        consulta.getFim().isAfter(c.getInicio())
         );
-        if (conflita) throw new IllegalStateException("Médico já possui consulta no horário");
+        if (conflito) {
+            throw new IllegalArgumentException("Conflito de horário: o médico já possui uma consulta nesse intervalo.");
+        }
+
+        // 4. Salvar e retornar ID
+        return consultaRepo.salvar(consulta);
     }
 }
